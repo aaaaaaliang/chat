@@ -10,7 +10,7 @@ func main() {
 	//初始化路径  数据库
 	utils.InitConfig()
 	utils.InitMySQL()
-
+	utils.InitRedis()
 	r := router.Router()
 	err := r.Run()
 	if err != nil {

@@ -29,9 +29,8 @@ func main() {
 	user := &models.UserBasic{
 		Name: "张雪亮",
 		// 其他字段赋值...
-		LoginTime:     time.Now(), // 设置合适的时间值
-		HeartbeatTime: time.Now(), // 设置合适的时间值
-		LoginOutTime:  time.Now(), // 设置合适的时间值
+		LoginTime:    time.Now(), // 设置合适的时间值
+		LoginOutTime: time.Now(), // 设置合适的时间值
 		// 其他字段赋值...
 	}
 	db.Create(user)

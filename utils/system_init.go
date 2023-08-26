@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"context"
 	"fmt"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -11,8 +13,28 @@ import (
 	"time"
 )
 
-var DB *gorm.DB
+var (
+	DB  *gorm.DB
+	Red *redis.Client
+)
 
+func InitRedis() {
+	Red = redis.NewClient(&redis.Options{
+		Addr:         viper.GetString("redis.addr"),
+		Password:     viper.GetString("redis.password"),
+		DB:           viper.GetInt("redis.DB"),
+		PoolSize:     viper.GetInt("redis.poolSize"),
+		MinIdleConns: viper.GetInt("redis.minIdleConn"),
+	})
+	ctx := context.Background()
+	pong, err := Red.Ping(ctx).Result()
+	if err != nil {
+		fmt.Println("初始化 Redis 失败", err)
+	} else {
+		fmt.Println("redis 初始化成功", pong)
+	}
+
+}
 func InitConfig() {
 	// 设置配置的名字是 app
 	viper.SetConfigName("app")
@@ -39,11 +61,6 @@ func InitMySQL() {
 		},
 	)
 
-	var err error
-	DB, err = gorm.Open(mysql.Open(viper.GetString("mysql.dns")), &gorm.Config{Logger: newLogger})
-	if err != nil {
-		fmt.Println("数据库连接失败:", err)
-		return
-	}
+	DB, _ = gorm.Open(mysql.Open(viper.GetString("mysql.dns")), &gorm.Config{Logger: newLogger})
 	fmt.Println("数据库连接成功")
 }
