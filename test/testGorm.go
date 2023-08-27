@@ -21,7 +21,7 @@ func main() {
 
 	// 迁移 schema
 	db.AutoMigrate(&models.UserBasic{})
-
+	db.AutoMigrate(&models.Message{})
 	// Create
 	/*user := &models.UserBasic{}
 	user.Name = "张雪亮"

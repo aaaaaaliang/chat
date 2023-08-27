@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"math/rand"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -233,4 +235,46 @@ func LogoutUser(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "退出登录成功",
 	})
+}
+
+// 防止跨域的伪造请求
+var upGrade = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func SendMsg(c *gin.Context) {
+	//将 HTTP 连接升级为 WebSocket 连接
+	ws, err := upGrade.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//执行结束后关闭websocket连接，将资源释放
+	defer func(ws *websocket.Conn) {
+		err := ws.Close()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}(ws)
+	MsgHandler(ws, c)
+}
+func MsgHandler(ws *websocket.Conn, c *gin.Context) {
+	msg, err := utils.Subscribe(c, utils.PublishKey)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	tm := time.Now().Format("2006-01-02 15:04:05")
+	m := fmt.Sprintf("[ws][%s]:%s", tm, msg)
+	//基于tcp 转化为字节流  1表示文本类型
+	err = ws.WriteMessage(1, []byte(m))
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func SendUserMsg(c *gin.Context) {
+	models.Chat(c.Writer, c.Request)
 }
