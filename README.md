@@ -13,4 +13,5 @@ swag init
 更新用户信息，包括用户名、密码、邮箱、电话等
 用户登录和退出，记录用户 IP 地址
 websocket的简单实现
+# websocket流程分析
 <img width="769" alt="websocket流程图" src="https://github.com/aaaaaaliang/chat/assets/117182742/ec7ed5b8-ecc2-4da7-8aed-4185dc546822">
