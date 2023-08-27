@@ -20,10 +20,6 @@ type Message struct {
 	Type       int    //发送类型
 	Media      int    //消息类型
 	Content    string //消息内容
-	Pic        string
-	Url        string
-	Desc       string
-	Amount     int //其他数字统计
 }
 
 func (table *Message) TableName() string {
