@@ -18,6 +18,7 @@ var (
 	Red *redis.Client
 )
 
+// 与redis建立连接
 func InitRedis() {
 	Red = redis.NewClient(&redis.Options{
 		Addr:         viper.GetString("redis.addr"),
@@ -63,4 +64,31 @@ func InitMySQL() {
 
 	DB, _ = gorm.Open(mysql.Open(viper.GetString("mysql.dns")), &gorm.Config{Logger: newLogger})
 	fmt.Println("数据库连接成功")
+}
+
+const (
+	PublishKey = "websocket"
+)
+
+// ctx 上下文对象，可以用于在函数间传递取消信号、截止时间等
+// channel 这是 Redis 的订阅频道名称，表示要发布消息到哪个频道
+// msg 要发布的内容
+
+// Publish 发布消息到redis
+func Publish(ctx context.Context, channel string, msg string) error {
+	var err error
+	//发布到指定频道
+	fmt.Println("Publish...", msg)
+	err = Red.Publish(ctx, channel, msg).Err() //发送消息
+	return err
+}
+
+// Subscribe 订阅redis消息
+func Subscribe(ctx context.Context, channel string) (string, error) {
+	//创建订阅对象 订阅对象是一个在 Redis 客户端库中用于管理和处理订阅操作的实例
+	sub := Red.Subscribe(ctx, channel)
+	//接收订阅消息
+	msg, err := sub.ReceiveMessage(ctx)
+	fmt.Println("Subscribe...", msg.Payload)
+	return msg.Payload, err
 }

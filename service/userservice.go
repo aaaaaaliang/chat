@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"math/rand"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -37,14 +39,23 @@ func GetUserList(c *gin.Context) {
 // @Router /user/createUser [get]
 func CreateUser(c *gin.Context) {
 	user := models.UserBasic{}
-	user.Name = c.Query("name")
+	/*user.Name = c.Query("name")
 	password := c.Query("password")
-	repassword := c.Query("repassword")
+	repassword := c.Query("repassword")*/
 
+	user.Name = c.Request.FormValue("name")
+	password := c.Request.FormValue("password")
+	repassword := c.Request.FormValue("Identity")
 	//生成六位数的随机密码
 	salt := fmt.Sprintf("%06d", rand.Int31())
 
 	data := models.FindUserByName(user.Name)
+	if user.Name == "" || password == "" || repassword == "" {
+		c.JSON(-1, gin.H{
+			"message": "用户名或密码不能为空!",
+		})
+		return
+	}
 	if data.Name != "" {
 		c.JSON(-1, gin.H{
 			"message": "用户名已注册!",
@@ -75,7 +86,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	//判断email是否重复
-	email := c.Query("email")
+	/*email := c.Query("email")
 	existingUserByEmail := models.FindUserByEmail(user.Email)
 	if existingUserByEmail.Email != "" {
 		c.JSON(-1, gin.H{
@@ -90,14 +101,14 @@ func CreateUser(c *gin.Context) {
 			"message": "该身份重复注册!",
 		})
 		return
-	}
+	}*/
 
 	/*user.PassWord = password*/
 	user.PassWord = utils.MakePassword(password, salt)
 	user.Salt = salt
-	user.Email = email
+	/*user.Email = email*/
 	user.Phone = phone
-	user.Identity = identity
+	/*user.Identity = identity*/
 	user.LoginTime = time.Now()
 	result := models.CreateUser(user) // 调用一次即可
 	if result.Error != nil {
@@ -172,13 +183,15 @@ func UpdateUser(c *gin.Context) {
 // @Router /user/findUserByNameAndPwd [post]
 func FindUserByNameAndPwd(c *gin.Context) {
 	data := models.UserBasic{}
-	name := c.Query("name")
-	password := c.Query("password")
+	/*name := c.Query("name")
+	password := c.Query("password")*/
+	name := c.Request.FormValue("name")
+	password := c.Request.FormValue("password")
 	clientIP := c.ClientIP()
 	user := models.FindUserByName(name)
 	if user.Name == "" {
 		c.JSON(200, gin.H{
-			"code":    0, //0正确 -1失败
+			"code":    -1, //0正确 -1失败
 			"message": "该用户不存在",
 			"data":    data,
 		})
@@ -233,4 +246,57 @@ func LogoutUser(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "退出登录成功",
 	})
+}
+
+// 防止跨域的伪造请求
+var upGrade = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func SendMsg(c *gin.Context) {
+	//将 HTTP 连接升级为 WebSocket 连接
+	ws, err := upGrade.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//执行结束后关闭websocket连接，将资源释放
+	defer func(ws *websocket.Conn) {
+		err := ws.Close()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}(ws)
+	MsgHandler(ws, c)
+}
+func MsgHandler(ws *websocket.Conn, c *gin.Context) {
+	msg, err := utils.Subscribe(c, utils.PublishKey)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	tm := time.Now().Format("2006-01-02 15:04:05")
+	m := fmt.Sprintf("[ws][%s]:%s", tm, msg)
+	//基于tcp 转化为字节流  1表示文本类型
+	err = ws.WriteMessage(1, []byte(m))
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func SendUserMsg(c *gin.Context) {
+	models.Chat(c.Writer, c.Request)
+}
+
+func SearchFriends(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Request.FormValue("userId"))
+	users := models.SearchFriend(int(uint(id)))
+	/*c.JSON(200, gin.H{
+		"code":    0, //0正确 -1失败
+		"message": "查询好友列表成功",
+		"data":    users,
+	})*/
+	utils.RespOKList(c.Writer, users, len(users))
 }
