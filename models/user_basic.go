@@ -82,3 +82,18 @@ func FindUserByEmail(email string) UserBasic {
 	utils.DB.Where("Email= ?", email).First(&user)
 	return user
 }
+
+//查找某个用户
+
+/*
+	func FindByID(id uint) UserBasic {
+		user := UserBasic{}
+		utils.DB.Where("id =?", id).First(&user)
+		return user
+	}
+*/
+func FindByName(name string) UserBasic {
+	user := UserBasic{}
+	utils.DB.Where("name =?", name).First(&user)
+	return user
+}

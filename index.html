@@ -63,9 +63,9 @@
                         mui.toast(res.message)
                     }else{         
                         var url = "/toChat?userId="+res.data.ID+"&token="+res.data.Identity
-                        location.href=url
                         /*location.replace("localhost:8080/toChat?userId="+res.data.ID+"token="+res.data.Identity)*/
                         mui.toast("登录成功,即将跳转")
+                        location.href=url
                         /*location.href = url*/
                     }
                 })

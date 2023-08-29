@@ -15,7 +15,7 @@ import (
 type Message struct {
 	gorm.Model //gorm包里的属性
 	Name       string
-	FormId     int64  //发送者
+	UserId     int64  //发送者
 	TargetId   int64  //接收者
 	Type       int    //发送类型
 	Media      int    //消息类型
@@ -61,9 +61,12 @@ func Chat(writer http.ResponseWriter, request *http.Request) {
 	}).Upgrade(writer, request, nil)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	//获取conn
+
+	/*currentTime:=uint64(time.Now().Unix())*/
 	node := &Node{
 		Conn:      conn,
 		DataQueue: make(chan []byte, 50),
@@ -77,10 +80,10 @@ func Chat(writer http.ResponseWriter, request *http.Request) {
 	//便于 用户通过ID 查找对应的连接信息
 	//clientMap映射，用来存储客户端的信息。
 	clientMap[userId] = node
+
 	rwLocker.Unlock()
 
 	go sendProc(node)
-
 	go recvProc(node)
 
 	sendMsg(userId, []byte("欢迎进入聊天室"))
@@ -91,6 +94,7 @@ func sendProc(node *Node) {
 	for {
 		select { //用来监听多个通道的消息  监听node.DataQueue
 		case data := <-node.DataQueue: //如果有消息可读，就赋值给data
+			/*fmt.Println("[ws]senfProc>>>userId:", "msg:", string(data))*/
 			err := node.Conn.WriteMessage(websocket.TextMessage, data) //将数据发送给websocket  D
 			if err != nil {
 				fmt.Println(err)
@@ -107,8 +111,9 @@ func recvProc(node *Node) {
 			fmt.Println(err)
 			return
 		}
+		dispatch(data)
 		broadMsg(data)
-		fmt.Println("[ws] <<<<<", data)
+		/*fmt.Println("[ws] <<<<<", string(data))*/
 	}
 }
 
@@ -121,6 +126,7 @@ func broadMsg(data []byte) {
 func init() {
 	go upSendProc()
 	go upRecvProc()
+	fmt.Println("init goroutine")
 }
 
 // 完成udp数据发送协程
@@ -139,6 +145,7 @@ func upSendProc() {
 	for {
 		select { //用来监听多个通道的消息  监听node.DataQueue
 		case data := <-upsendChan: //如果有消息可读，就赋值给data
+			fmt.Println("upSendProc: data", string(data))
 			_, err := conn.Write(data)
 			if err != nil {
 				fmt.Println(err)
@@ -182,14 +189,20 @@ func dispatch(data []byte) {
 	}
 	switch msg.Type {
 	case 1:
+		/*fmt.Println("dispatch  data :", string(data))*/
 		sendMsg(msg.TargetId, data)
 	}
 }
-func sendMsg(userID int64, msg []byte) {
+func sendMsg(userId int64, msg []byte) {
+	/*fmt.Println("sendMsg >>> userId :", userID, " msg:", string(msg))*/
 	rwLocker.RLock()
-	node, ok := clientMap[userID]
+	node, ok := clientMap[userId]
 	rwLocker.RUnlock()
 	if ok {
 		node.DataQueue <- msg
 	}
 }
+
+//方案一map<userId><群id>   优点：锁的频率较低  需要轮询全部map
+//方案二 map<群Id><userid>   以群为id  优点：查询效率会更快  缺点：发送消息 需要根据用户ID获取Node，锁的频率高
+//1 新建群  2 加去群  分发消息(群里面每个人都发)
