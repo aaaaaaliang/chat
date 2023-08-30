@@ -10,7 +10,7 @@ import (
 type Contact struct {
 	gorm.Model
 	OwnerId  uint //谁的关系信息
-	TargetID uint //对应的谁
+	TargetId uint //对应的谁
 	Type     int  //对应的类型1好友 2群主 3
 	Desc     string
 }
@@ -27,7 +27,7 @@ func SearchFriend(userID int) []UserBasic {
 	for _, v := range contacts {
 		fmt.Println(">>>>>>>>>>>>>", v)
 		// 将目标用户的 ID 添加到 objIds 切片中
-		objIds = append(objIds, uint64(v.TargetID))
+		objIds = append(objIds, uint64(v.TargetId))
 	}
 	// 创建一个空的 UserBasic 切片来存储查询结果
 	users := make([]UserBasic, 0)
@@ -62,7 +62,7 @@ func AddFriend(userId uint, targetName string) (int, string) {
 
 			contact := Contact{}
 			contact.OwnerId = userId
-			contact.TargetID = targetUser.ID
+			contact.TargetId = targetUser.ID
 			contact.Type = 1
 			if err := utils.DB.Create(&contact).Error; err != nil {
 				tx.Rollback()
@@ -70,7 +70,7 @@ func AddFriend(userId uint, targetName string) (int, string) {
 			}
 			contact1 := Contact{}
 			contact1.OwnerId = targetUser.ID
-			contact1.TargetID = userId
+			contact1.TargetId = userId
 			contact1.Type = 1
 			if err := utils.DB.Create(&contact1).Error; err != nil {
 				tx.Rollback()

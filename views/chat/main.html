@@ -1,4 +1,4 @@
-
+{{define "/chat/main.shtml"}}
 <div v-show="win == 'single' || win == 'group'">
     <header class="mui-bar mui-bar-nav">
         <a class="mui-icon mui-icon-left-nav mui-pull-left" @tap="win='main'"></a>
@@ -105,3 +105,4 @@
     <div class="r-sigh">!</div>
     <div id="audio-tips" class="rsalert">手指上滑，取消发送</div>
 </div>
+{{end}}

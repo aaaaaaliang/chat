@@ -4,7 +4,6 @@ import (
 	"chat/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Product struct {
@@ -20,22 +19,23 @@ func main() {
 	}
 
 	// 迁移 schema
-	db.AutoMigrate(&models.UserBasic{})
-	db.AutoMigrate(&models.Message{})
-	db.AutoMigrate(&models.GroupBasic{})
-	db.AutoMigrate(&models.Contact{})
+	/*db.AutoMigrate(&models.UserBasic{})
+	db.AutoMigrate(&models.Message{})*/
+	/*db.AutoMigrate(&models.GroupBasic{})*/
+	/*	db.AutoMigrate(&models.Contact{})*/
+	db.AutoMigrate(&models.Community{})
 	// Create
 	/*user := &models.UserBasic{}
 	user.Name = "张雪亮"
 	db.Create(user)*/
-	user := &models.UserBasic{
+	/*user := &models.UserBasic{
 		Name: "张雪亮",
 		// 其他字段赋值...
 		LoginTime:    time.Now(), // 设置合适的时间值
 		LoginOutTime: time.Now(), // 设置合适的时间值
 		// 其他字段赋值...
 	}
-	db.Create(user)
+	db.Create(user)*/
 
 	// Read
 	/*var product Product*/
