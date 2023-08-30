@@ -3,21 +3,22 @@
 # 基本介绍
 1.该项目基于gin框架，基于目前主流的前后端开发
 # 使用说明
-使用 Visual Studio Code 等编辑工具，进入项目根目录，修改config/app.yaml 中 mysql 相关配置。
+使用 GoLand 等编辑工具，进入项目根目录，修改config/app.yaml 中 mysql 相关配置。
 ## 克隆项目
 git clone https://github.com/aaaaaaliang/golang.git
 ##  使用 go mod 并安装go依赖包
 go mod tidy
 ## 运行项目 
-1.安装 swagger
-go get -u github.com/swaggo/swag/cmd/swag
-2.生成api文档
+### 1.安装 swagger
+go get -u github.com/swaggo/swag/cmd/swag  
+### 2.生成api文档  
 swag init
-3.运行testGorm.go里文件生成数据库表
+### 3.运行testGorm.go里文件生成数据库表  
 go run testGorm.go
-4.go run main.go
+### 4.go run main.go  
+
 ## 实现聊天
-启动完项目 浏览器访问http://localhost:8080
+启动完项目 浏览器访问http://localhost:8080  
 做完注册 登陆操作以后 找到添加好友 即可开始聊天
 
 # 主要功能
