@@ -22,11 +22,11 @@ go run testGorm.go
 做完注册 登陆操作以后 找到添加好友 即可开始聊天
 
 # 主要功能
-创建用户，包括用户名、密码、邮箱、电话和身份信息
-根据用户 ID 删除用户
-更新用户信息，包括用户名、密码、邮箱、电话等
-用户登录和退出，记录用户 IP 地址
-添加好友 上传文件
-websocket的简单实现
+注册用户并登陆  
+添加好友  
+和好友实时通信  
+创造群添加群和好友实时通信  
+上传图片等功能
+
 # websocket流程分析
 <img width="769" alt="websocket流程图" src="https://github.com/aaaaaaliang/chat/assets/117182742/ec7ed5b8-ecc2-4da7-8aed-4185dc546822">
