@@ -28,6 +28,7 @@ func Router() *gin.Engine {
 	r.POST("/user/logoutUser", service.LogoutUser)
 	r.POST("/user/updateUser", service.UpdateUser)
 	r.POST("/user/findUserByNameAndPwd", service.FindUserByNameAndPwd)
+	r.POST("/user/find", service.FindByID)
 	//静态资源
 	r.Static("/asset", "asset/")
 	r.LoadHTMLGlob("views/**/*")

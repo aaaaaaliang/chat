@@ -112,7 +112,7 @@ func recvProc(node *Node) {
 			return
 		}
 		dispatch(data)
-		broadMsg(data)
+		/*broadMsg(data)*/
 		/*fmt.Println("[ws] <<<<<", string(data))*/
 	}
 }
@@ -191,6 +191,8 @@ func dispatch(data []byte) {
 	case 1:
 		/*fmt.Println("dispatch  data :", string(data))*/
 		sendMsg(msg.TargetId, data)
+	case 2: //群发
+		sendGroupMsg(msg.TargetId, data) //发送的群ID ，消息内容
 	}
 }
 func sendMsg(userId int64, msg []byte) {
@@ -206,3 +208,31 @@ func sendMsg(userId int64, msg []byte) {
 // 方案一map<userId><群id>   优点：锁的频率较低  需要轮询全部map
 // 方案二 map<群Id><userid>   以群为id  优点：查询效率会更快  缺点：发送消息 需要根据用户ID获取Node，锁的频率高
 // 1 新建群  2 加去群  分发消息(群里面每个人都发)
+func sendGroupMsg(targetId int64, msg []byte) {
+	userIds := SearchUserByGroupId(uint(targetId))
+	for i := 0; i < len(userIds); i++ {
+		//排除给自己的
+		if targetId != int64(userIds[i]) {
+			sendMsg(int64(userIds[i]), msg)
+		}
+
+	}
+}
+
+/*func sendGroupMsg(targetId int64, msg []byte) {
+	// 获取群组targetId的所有成员ID
+	memberIds := utils.Red.SMembers(context.Background(), fmt.Sprintf("group:%d:members", targetId)).Val()
+	if len(memberIds) > 0 {
+		for i := 0; i < len(memberIds); i++ {
+			id, err := strconv.ParseInt(memberIds[i], 10, 64)
+			if err != nil {
+				fmt.Println("Error parsing member ID:", err)
+				continue
+			}
+			// 排除给自己的
+			if targetId != id {
+				sendMsg(id, msg)
+			}
+		}
+	}
+}*/
