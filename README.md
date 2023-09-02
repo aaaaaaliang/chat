@@ -9,7 +9,7 @@ git clone https://github.com/aaaaaaliang/golang.git
 ##  使用 go mod 并安装go依赖包
 go mod tidy
 ## 运行项目 
-### 1.安装 swagger
+### 1.安装 swagge
 go get -u github.com/swaggo/swag/cmd/swag  
 ### 2.生成api文档  
 swag init
@@ -21,7 +21,13 @@ go run testGorm.go
 启动完项目 浏览器访问http://localhost:8080  
 做完注册 登陆操作以后 找到添加好友 即可开始聊天
 
+# 技术架构
+<img width="657" alt="技术架构图" src="https://github.com/aaaaaaliang/chat/assets/117182742/9d67e6d3-5700-4599-99d0-ad1df197d4e7">
+
+
 # 主要功能
+<img width="598" alt="gin-chat流程" src="https://github.com/aaaaaaliang/chat/assets/117182742/ff642685-5852-487d-9148-64a23e7f5daf">
+
 注册用户并登陆  
 添加好友  
 和好友实时通信  
